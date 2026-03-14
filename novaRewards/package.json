@@ -1,0 +1,17 @@
+{
+  "name": "nova-rewards",
+  "version": "1.0.0",
+  "description": "NovaRewards — blockchain-powered loyalty rewards on Stellar",
+  "private": true,
+  "workspaces": [
+    "backend",
+    "frontend",
+    "blockchain"
+  ],
+  "scripts": {
+    "test": "cd backend && npm test",
+    "setup:new": "node scripts/setup.js",
+    "setup": "node scripts/setup.js --use-env",
+    "migrate": "node database/migrate.js"
+  }
+}

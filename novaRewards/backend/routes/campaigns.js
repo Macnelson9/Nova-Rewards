@@ -1,0 +1,70 @@
+const router = require('express').Router();
+const {
+  validateCampaign,
+  createCampaign,
+  getCampaignsByMerchant,
+} = require('../db/campaignRepository');
+
+/**
+ * POST /api/campaigns
+ * Creates a new reward campaign after validating inputs.
+ * Requirements: 7.2, 7.3
+ */
+router.post('/', async (req, res, next) => {
+  try {
+    const { merchantId, name, rewardRate, startDate, endDate } = req.body;
+
+    if (!merchantId) {
+      return res.status(400).json({
+        success: false,
+        error: 'validation_error',
+        message: 'merchantId is required',
+      });
+    }
+
+    if (!name || typeof name !== 'string' || name.trim() === '') {
+      return res.status(400).json({
+        success: false,
+        error: 'validation_error',
+        message: 'name is required',
+      });
+    }
+
+    const { valid, errors } = validateCampaign({ rewardRate, startDate, endDate });
+    if (!valid) {
+      return res.status(400).json({
+        success: false,
+        error: 'validation_error',
+        message: errors.join('; '),
+      });
+    }
+
+    const campaign = await createCampaign({
+      merchantId,
+      name: name.trim(),
+      rewardRate,
+      startDate,
+      endDate,
+    });
+
+    res.status(201).json({ success: true, data: campaign });
+  } catch (err) {
+    next(err);
+  }
+});
+
+/**
+ * GET /api/campaigns/:merchantId
+ * Returns all campaigns for a merchant.
+ * Requirements: 7.2
+ */
+router.get('/:merchantId', async (req, res, next) => {
+  try {
+    const campaigns = await getCampaignsByMerchant(req.params.merchantId);
+    res.json({ success: true, data: campaigns });
+  } catch (err) {
+    next(err);
+  }
+});
+
+module.exports = router;
